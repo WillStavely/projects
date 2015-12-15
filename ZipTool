@@ -1,0 +1,43 @@
+import zipfile
+import zlib
+import os
+
+class ZipTool():
+    '''
+    Tool for zipping a bunch of files. 
+    '''
+    
+    def __init__(self, fileNameList, zipOutName = "outputZip.zip"):
+        #fileList is a list of filenames
+        self.fileList = fileNameList
+        self.zipOutName = zipOutName
+    
+    def zipFiles(self):
+        #zips the files into a zip file named zipOutName. Formats the filename nicely.
+        if (self.zipOutName.find(".") == -1):
+            self.zipOutName = self.zipOutName + ".zip"
+        else:
+            self.zipOutName = self.zipOutName.split(".")[0] + ".zip"
+        
+        print("Starting zipping.")
+        
+        zipper = zipfile.ZipFile(self.zipOutName, "w")
+        
+        for file in self.fileList:
+            zipper.write(file.split("/")[-1], compress_type = zipfile.ZIP_DEFLATED) #writes the file to the zip, splitting the filename to remove the directory.
+            print(file + " zipped")
+        
+        
+        print("Finished zipping")
+        zipper.close()
+        
+    def unzipFiles(self, extractPath = os.getcwd()):
+        #unzips the files in the zip file named zipOutName to the supplied extract path.
+        try:
+            zipper = zipfile.ZipFile(self.zipOutName,"r")
+            zipper.extractall(extractPath)
+            zipper.close()
+        except:
+            print("Unexpected error: " + sys.exc_info()[0])
+            raise
+    
