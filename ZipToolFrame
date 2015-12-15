@@ -1,0 +1,83 @@
+from tkinter import *
+import tkinter as tk
+import ZipTool
+from tkinter import filedialog
+import tkinter.messagebox as tk2
+from tkinter import font
+
+class App(tk.Frame):
+    
+    def __init__(self, master):
+        
+        tk.Frame.__init__(self,master)
+        self.createWidgets(master)
+        
+        
+        
+        
+        
+    def createWidgets(self,master):
+        
+        #initialise widgets. Widgets are packed into the left and right of the frame.
+        
+        self.fileNameList = []
+        
+        self.customFont = font.Font(family="Helvetica", size=18)
+        
+        self.selectedFileListbox = Listbox(master, selectmode=SINGLE, font = self.customFont)
+        self.selectedFileListbox.pack(side = LEFT, expand=YES, fill = BOTH)
+        
+        self.c = Canvas(master)
+        self.c.pack(side = RIGHT, expand = YES, fill = BOTH)
+        
+        self.addFileButton = Button(self.c, text = "Add files", font = self.customFont)
+        self.addFileButton.bind("<ButtonRelease-1>", self.addFiles)    
+        self.addFileButton.pack( expand=YES, fill = BOTH)
+        
+        self.deleteSelectedButton = Button(self.c, text = "Remove selected file", command = self.deleteSelected, font = self.customFont)
+        self.deleteSelectedButton.pack( expand=YES, fill = BOTH)
+        
+        self.filenameLabel = LabelFrame(self.c, text = "Enter name of zip file:", font = self.customFont)
+        self.filenameLabel.pack(expand = YES, fill = BOTH)
+        
+        self.outputFilenameEntry = Entry(self.filenameLabel, text = "Output filename", font = self.customFont)
+        self.outputFilenameEntry.pack(expand=YES, fill = BOTH)
+        
+        self.zipFilesButton = Button(self.c, text = "Zip all files", command = self.zipFiles, font = self.customFont)
+        self.zipFilesButton.pack( expand=YES, fill = BOTH) 
+        
+        self.quitButton = Button(self.c, text="Quit", command = self.quit, font = self.customFont)
+        self.quitButton.pack( expand=YES, fill = BOTH)        
+         
+           
+
+        
+    def addFiles(self,event):
+        #gets the names of files to zip from the user, and adds them to the listbox.
+        returnedFileNames = filedialog.askopenfilenames()
+        for file in returnedFileNames:
+            self.fileNameList.append(file)
+            self.selectedFileListbox.insert(END, file.split("/")[-1])
+    
+    def deleteSelected(self):
+        #removes the currently selected item from the listbox and the fileNameList.
+        activeIndex = self.selectedFileListbox.index(ACTIVE)
+        if self.selectedFileListbox.selection_includes(activeIndex):
+            self.fileNameList.pop(activeIndex)
+            self.selectedFileListbox.delete(activeIndex)
+            
+    def zipFiles(self):
+        #Zips the files in fileNameList into the specified zip file.
+        outputFilename = self.outputFilenameEntry.get()
+        if outputFilename == "":
+            outputFilename = "output.zip"
+        
+        try:
+            zipper = ZipTool.ZipTool(self.fileNameList, outputFilename)
+            zipper.zipFiles()
+            tk2.showinfo("Success", "Files zipped in " + zipper.zipOutName)
+        except:
+            tk2.showinfo("Error", "Unexpected error encountered: " + sys.exc_info()[0])
+            raise
+        
+        
